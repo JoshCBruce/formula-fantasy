@@ -30,7 +30,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0
     
     - name: Set up Python
@@ -41,34 +40,52 @@ jobs:
     - name: Extract version from tag
       id: version
       run: |
-        TAG=${GITHUB_REF#refs/tags/}
-        VERSION=${TAG#v}
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          # For manual triggers, use current version or prompt user
+          VERSION="1.0.0"
+          TAG="v1.0.0"
+          echo "Manual trigger - using default version: $VERSION"
+        else
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}
+          echo "Tag trigger - extracted version: $VERSION from tag: $TAG"
+        fi
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "tag=$TAG" >> $GITHUB_OUTPUT
-        echo "Extracted version: $VERSION from tag: $TAG"
     
-    - name: Update version in pyproject.toml
+    - name: Update version in files
       run: |
-        sed -i 's/version = "[^"]*"/version = "${{ steps.version.outputs.version }}"/' pyproject.toml
-        echo "✅ Updated pyproject.toml version to ${{ steps.version.outputs.version }}"
+        echo "Updating version to ${{ steps.version.outputs.version }} in all files..."
+        
+        # Update pyproject.toml
+        if [ -f "pyproject.toml" ]; then
+          sed -i 's/version = "[^"]*"/version = "${{ steps.version.outputs.version }}"/' pyproject.toml
+          echo "✅ Updated pyproject.toml"
+        fi
+        
+        # Update setup.py  
+        if [ -f "setup.py" ]; then
+          sed -i 's/version="[^"]*"/version="${{ steps.version.outputs.version }}"/' setup.py
+          echo "✅ Updated setup.py"
+        fi
+        
+        # Update __init__.py
+        if [ -f "formula_fantasy/__init__.py" ]; then
+          sed -i 's/__version__ = "[^"]*"/__version__ = "${{ steps.version.outputs.version }}"/' formula_fantasy/__init__.py
+          echo "✅ Updated __init__.py"
+        fi
+        
+        echo "Version update completed!"
     
-    - name: Update version in setup.py
+    - name: Verify version updates
       run: |
-        sed -i 's/version="[^"]*"/version="${{ steps.version.outputs.version }}"/' setup.py
-        echo "✅ Updated setup.py version to ${{ steps.version.outputs.version }}"
-    
-    - name: Update version in __init__.py
-      run: |
-        sed -i 's/__version__ = "[^"]*"/__version__ = "${{ steps.version.outputs.version }}"/' formula_fantasy/__init__.py
-        echo "✅ Updated __init__.py version to ${{ steps.version.outputs.version }}"
-    
-    - name: Commit version updates
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add pyproject.toml setup.py formula_fantasy/__init__.py
-        git commit -m "🤖 Auto-update version to ${{ steps.version.outputs.version }}" || echo "No changes to commit"
-        git push origin HEAD:main || echo "Nothing to push"
+        echo "Verifying version updates..."
+        echo "pyproject.toml version:"
+        grep 'version = ' pyproject.toml || echo "No version found in pyproject.toml"
+        echo "setup.py version:"  
+        grep 'version=' setup.py || echo "No version found in setup.py"
+        echo "__init__.py version:"
+        grep '__version__' formula_fantasy/__init__.py || echo "No version found in __init__.py"
 
   # Test the package before publishing
   test:
@@ -82,13 +99,27 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        ref: main  # Use updated main branch
         fetch-depth: 0
     
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+    
+    - name: Extract and apply version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION="1.0.0"
+        else
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}
+        fi
+        echo "Applying version $VERSION for testing..."
+        
+        # Update version files for testing
+        sed -i 's/version = "[^"]*"/version = "'$VERSION'"/' pyproject.toml
+        sed -i 's/version="[^"]*"/version="'$VERSION'"/' setup.py
+        sed -i 's/__version__ = "[^"]*"/__version__ = "'$VERSION'"/' formula_fantasy/__init__.py
     
     - name: Install dependencies
       run: |
@@ -116,7 +147,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        ref: main  # Use updated main branch with version changes
+        fetch-depth: 0
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -126,10 +157,39 @@ jobs:
     - name: Extract version from tag
       id: version
       run: |
-        TAG=${GITHUB_REF#refs/tags/}
-        VERSION=${TAG#v}
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION="1.0.0"
+          TAG="v1.0.0"
+          echo "Manual trigger - using default version: $VERSION"
+        else
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}
+          echo "Tag trigger - extracted version: $VERSION from tag: $TAG"
+        fi
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "Publishing version: $VERSION"
+    
+    - name: Update version in files for publishing
+      run: |
+        echo "Updating version to ${{ steps.version.outputs.version }} for publishing..."
+        
+        # Update pyproject.toml
+        if [ -f "pyproject.toml" ]; then
+          sed -i 's/version = "[^"]*"/version = "${{ steps.version.outputs.version }}"/' pyproject.toml
+          echo "✅ Updated pyproject.toml"
+        fi
+        
+        # Update setup.py  
+        if [ -f "setup.py" ]; then
+          sed -i 's/version="[^"]*"/version="${{ steps.version.outputs.version }}"/' setup.py
+          echo "✅ Updated setup.py"
+        fi
+        
+        # Update __init__.py
+        if [ -f "formula_fantasy/__init__.py" ]; then
+          sed -i 's/__version__ = "[^"]*"/__version__ = "${{ steps.version.outputs.version }}"/' formula_fantasy/__init__.py
+          echo "✅ Updated __init__.py"
+        fi
     
     - name: Install build dependencies
       run: |
