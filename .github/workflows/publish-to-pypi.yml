@@ -8,6 +8,11 @@ on:
   # Also allow manual triggering
   workflow_dispatch:
 
+permissions:
+  contents: write  # Needed to create releases and push to repo
+  pages: write     # Needed for GitHub Pages
+  id-token: write  # Needed for OIDC
+
 jobs:
   # Debug information
   debug:
@@ -239,7 +244,9 @@ jobs:
           git commit -m "📦 Update README badges for v${{ steps.version.outputs.version }}
           
           🤖 Generated with [Claude Code](https://claude.ai/code)"
-          git push origin HEAD:main || echo "Failed to push README updates"
+          
+          # Push changes back to main
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main || echo "Failed to push README updates"
         fi
     
     - name: Create GitHub Release
