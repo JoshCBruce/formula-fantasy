@@ -147,6 +147,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0
     
     - name: Set up Python
@@ -215,6 +216,32 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
       run: twine upload dist/*
     
+    - name: Update README badges
+      run: |
+        echo "Updating README badges with version ${{ steps.version.outputs.version }}..."
+        
+        # Update PyPI version badge to show specific version
+        sed -i 's|https://badge.fury.io/py/formula-fantasy.svg|https://img.shields.io/badge/PyPI-v${{ steps.version.outputs.version }}-blue|g' README.md
+        
+        # Also update the generic PyPI badge as backup
+        sed -i 's|https://img.shields.io/pypi/v/formula-fantasy|https://img.shields.io/badge/PyPI-v${{ steps.version.outputs.version }}-blue|g' README.md
+        
+        echo "✅ Updated README badges"
+    
+    - name: Commit README updates
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add README.md
+        if git diff --cached --quiet; then
+          echo "No README changes to commit"
+        else
+          git commit -m "📦 Update README badges for v${{ steps.version.outputs.version }}
+          
+          🤖 Generated with [Claude Code](https://claude.ai/code)"
+          git push origin HEAD:main || echo "Failed to push README updates"
+        fi
+    
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
@@ -232,6 +259,7 @@ jobs:
           
           ### ✨ What's New
           - Version automatically updated in all files
+          - README badges updated with new version
           - Package available at: https://pypi.org/project/formula-fantasy/
           - Check commit history for detailed changes
           
