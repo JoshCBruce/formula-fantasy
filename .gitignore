@@ -170,3 +170,5 @@ temp_*.py
 
 # Logs
 *.log
+
+GITHUB_ACTIONS_PYPI.md
