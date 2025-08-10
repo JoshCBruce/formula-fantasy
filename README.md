@@ -1,6 +1,6 @@
 # Formula Fantasy 🏎️
 
-[![PyPI version](https://badge.fury.io/py/formula-fantasy.svg)](https://pypi.org/project/formula-fantasy/)
+[![PyPI version](https://img.shields.io/badge/PyPI-v1.0.3-blue)](https://pypi.org/project/formula-fantasy/)
 [![Python versions](https://img.shields.io/pypi/pyversions/formula-fantasy.svg)](https://pypi.org/project/formula-fantasy/)
 [![License](https://img.shields.io/github/license/JoshCBruce/formula-fantasy.svg)](https://github.com/JoshCBruce/formula-fantasy/blob/main/LICENSE)
 
