@@ -22,6 +22,8 @@ Examples:
   %(prog)s VER latest                 # Driver points for latest round
   %(prog)s VER 15 race overtakeBonus  # Specific point breakdown
   %(prog)s RBR 15                     # Constructor points for round 15
+  %(prog)s VER --season               # Driver season total points
+  %(prog)s MCL --season               # Constructor season total points
   %(prog)s --drivers                  # List all drivers
   %(prog)s --constructors             # List all constructors
         """
@@ -36,6 +38,7 @@ Examples:
     parser.add_argument("--constructors", action="store_true", help="List all available constructors")
     parser.add_argument("--info", action="store_true", help="Get full info for abbreviation")
     parser.add_argument("--breakdown", action="store_true", help="Get points breakdown")
+    parser.add_argument("--season", action="store_true", help="Get season total points")
     
     args = parser.parse_args()
     
@@ -79,6 +82,15 @@ Examples:
                 print(f"Season Total: {info.get('seasonTotalPoints', 0)} points")
                 print(f"Value: {info.get('value', 'N/A')}")
                 print(f"Picked by: {info.get('percentagePicked', 0)}%")
+            return
+
+        if args.season:
+            if is_driver:
+                points = core.get_driver_season_points(abbrev)
+                print(f"{abbrev} season total: {points} points")
+            else:
+                points = core.get_constructor_season_points(abbrev)
+                print(f"{abbrev} season total: {points} points")
             return
             
         if args.breakdown or args.points_type:

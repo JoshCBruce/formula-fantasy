@@ -333,3 +333,41 @@ def get_constructor_info(abbreviation: str) -> Dict[str, Any]:
         return _fetch_json_data(url)
     except F1FantasyError:
         raise F1FantasyError(f"No data found for constructor {abbreviation}")
+
+def get_driver_season_points(abbreviation: str) -> int:
+    """
+    Get total season points for a driver
+    
+    Args:
+        abbreviation: Driver abbreviation (e.g., "VER", "HAM")
+        
+    Returns:
+        Total season points for the driver
+        
+    Examples:
+        >>> get_driver_season_points("VER")
+        335
+        >>> get_driver_season_points("NOR")
+        374
+    """
+    driver_info = get_driver_info(abbreviation)
+    return driver_info.get("seasonTotalPoints", 0)
+
+def get_constructor_season_points(abbreviation: str) -> int:
+    """
+    Get total season points for a constructor
+    
+    Args:
+        abbreviation: Constructor abbreviation (e.g., "RBR", "MCL")
+        
+    Returns:
+        Total season points for the constructor
+        
+    Examples:
+        >>> get_constructor_season_points("MCL")
+        1215
+        >>> get_constructor_season_points("RBR")
+        568
+    """
+    constructor_info = get_constructor_info(abbreviation)
+    return constructor_info.get("seasonTotalPoints", 0)

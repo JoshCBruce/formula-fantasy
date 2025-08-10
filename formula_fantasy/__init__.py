@@ -26,7 +26,9 @@ from .core import (
     list_drivers,
     list_constructors,
     get_driver_info,
-    get_constructor_info
+    get_constructor_info,
+    get_driver_season_points,
+    get_constructor_season_points
 )
 
 __all__ = [
@@ -38,5 +40,7 @@ __all__ = [
     "list_drivers",
     "list_constructors",
     "get_driver_info",
-    "get_constructor_info"
+    "get_constructor_info",
+    "get_driver_season_points",
+    "get_constructor_season_points"
 ]
