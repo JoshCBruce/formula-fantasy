@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "formula-fantasy"
+version = "1.0.0"
+description = "A simple Python library for fetching F1 Fantasy driver and constructor data"
+readme = "formula_fantasy/README.md"
+requires-python = ">=3.7"
+license = {file = "LICENSE"}
+authors = [
+    {name = "F1 Fantasy Data Team", email = "noreply@f1fantasy.dev"}
+]
+maintainers = [
+    {name = "F1 Fantasy Data Team", email = "noreply@f1fantasy.dev"}
+]
+keywords = ["f1", "formula1", "fantasy", "racing", "motorsport", "api", "data", "statistics"]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers", 
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Games/Entertainment",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8", 
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "requests>=2.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov", 
+    "black",
+    "flake8",
+    "mypy",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/formula-fantasy"
+Documentation = "https://github.com/yourusername/formula-fantasy#readme"
+Repository = "https://github.com/yourusername/formula-fantasy.git"
+Issues = "https://github.com/yourusername/formula-fantasy/issues"
+"Data Source" = "https://github.com/JoshCBruce/fantasy-data"
+
+[project.scripts]
+formula-fantasy = "formula_fantasy.cli:main"
+
+[tool.setuptools]
+packages = ["formula_fantasy"]
+
+[tool.setuptools.package-data]
+formula_fantasy = ["README.md"]

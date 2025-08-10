@@ -1,0 +1,5 @@
+include LICENSE
+include formula_fantasy/README.md
+include formula_fantasy/*.py
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
