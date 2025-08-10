@@ -4,15 +4,28 @@ name: Publish Formula Fantasy to PyPI
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v*'  # More flexible - matches v1.0.0, v1.0.0-test, etc.
   # Also allow manual triggering
   workflow_dispatch:
 
 jobs:
+  # Debug information
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Debug workflow trigger
+      run: |
+        echo "Event name: ${{ github.event_name }}"
+        echo "Ref: ${{ github.ref }}"
+        echo "Ref type: ${{ github.ref_type }}"
+        echo "Tag check: ${{ startsWith(github.ref, 'refs/tags/') }}"
+        echo "Manual trigger: ${{ github.event_name == 'workflow_dispatch' }}"
+
   # Update version numbers automatically
   update-version:
+    needs: debug
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     
     steps:
     - uses: actions/checkout@v4
@@ -61,6 +74,7 @@ jobs:
   test:
     needs: update-version
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     strategy:
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
@@ -69,6 +83,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         ref: main  # Use updated main branch
+        fetch-depth: 0
     
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
@@ -96,7 +111,7 @@ jobs:
   publish-pypi:
     needs: test
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     
     steps:
     - uses: actions/checkout@v4
@@ -181,7 +196,7 @@ jobs:
   test-installation:
     needs: publish-pypi
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     
     steps:
     - name: Set up Python
