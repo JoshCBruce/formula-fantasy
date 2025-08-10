@@ -26,7 +26,7 @@ pip install formula-fantasy
 ### Basic Usage
 
 ```python
-from formula_fantasy import get_driver_points, get_constructor_points
+from formula_fantasy import get_driver_points, get_constructor_points, get_driver_season_points
 
 # Get driver points for latest race
 points = get_driver_points("VER")  # Max Verstappen
@@ -35,6 +35,10 @@ print(f"VER latest points: {points}")
 # Get constructor points for specific round
 points = get_constructor_points("MCL", "14")  # McLaren round 14
 print(f"MCL round 14: {points} points")
+
+# Get season total points
+season_points = get_driver_season_points("VER")  # Max Verstappen season total
+print(f"VER season total: {season_points} points")
 ```
 
 ### CLI Usage
@@ -45,6 +49,12 @@ formula-fantasy VER 14
 
 # Constructor points for latest round  
 formula-fantasy MCL latest
+
+# Season total points
+formula-fantasy VER --season
+
+# Constructor season total points  
+formula-fantasy MCL --season
 
 # List all available drivers
 formula-fantasy --drivers
@@ -114,11 +124,13 @@ from formula_fantasy import *
 
 # Driver data
 get_driver_points(abbreviation, round="latest")
+get_driver_season_points(abbreviation)                    # Season total points
 get_driver_breakdown(abbreviation, round="latest", session="race", points_type=None) 
 get_driver_info(abbreviation)
 
 # Constructor data  
 get_constructor_points(abbreviation, round="latest")
+get_constructor_season_points(abbreviation)              # Season total points
 get_constructor_breakdown(abbreviation, round="latest", session="race", points_type=None)
 get_constructor_info(abbreviation)
 
@@ -143,15 +155,32 @@ MCL, FER, RBR, MER, AMR, ALP, HAS, RB, WIL, SAU
 
 ### Find Value Picks
 ```python
-from formula_fantasy import get_driver_info, list_drivers
+from formula_fantasy import get_driver_season_points, get_driver_info, list_drivers
 
-# Find best points per cost ratio
+# Find best points per cost ratio using season points function
 for driver in list_drivers():
     info = get_driver_info(driver)
     value = float(info['value'].replace('M', ''))
-    points = info['seasonTotalPoints']
+    points = get_driver_season_points(driver)  # Use dedicated season points function
     ratio = points / value if value > 0 else 0
     print(f"{driver}: {ratio:.1f} pts/M")
+```
+
+### Get Season Totals
+```python
+from formula_fantasy import get_driver_season_points, get_constructor_season_points
+
+# Driver season totals
+max_points = get_driver_season_points("VER")     # Max Verstappen
+lando_points = get_driver_season_points("NOR")   # Lando Norris
+print(f"VER season total: {max_points} points")
+print(f"NOR season total: {lando_points} points")
+
+# Constructor season totals  
+mclaren_points = get_constructor_season_points("MCL")  # McLaren
+ferrari_points = get_constructor_season_points("FER")  # Ferrari
+print(f"McLaren season total: {mclaren_points} points")
+print(f"Ferrari season total: {ferrari_points} points")
 ```
 
 ### Track Performance Trends
@@ -203,8 +232,14 @@ python -m twine upload dist/*
 # Test basic functionality
 python -c "from formula_fantasy import get_driver_points; print(get_driver_points('VER', '14'))"
 
-# Test CLI
+# Test season points function
+python -c "from formula_fantasy import get_driver_season_points; print(get_driver_season_points('VER'))"
+
+# Test CLI - round points
 formula-fantasy VER 14
+
+# Test CLI - season points
+formula-fantasy VER --season
 
 # Run visualization examples  
 python examples/example_visualization.py
